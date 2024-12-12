@@ -8,16 +8,19 @@ import com.yevbes.internet_shop.model.OrderStatus;
 import com.yevbes.internet_shop.repository.GoodRepository;
 import com.yevbes.internet_shop.repository.OrderRepository;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class OrderServiceImpl implements OrderService {
+
+    private static final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
 
     @Autowired
     private OrderRepository orderRepository;
@@ -27,11 +30,13 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public List<Order> listAllOrders() {
+        logger.info("Fetching all orders");
         return orderRepository.findAll();
     }
 
     @Override
     public Order getOrderById(Long id) {
+        logger.info("Fetching order with id: {}", id);
         return orderRepository.findById(id)
                 .orElseThrow(() -> new OrderNotFoundException("Order with id " + id + " not found"));
     }
@@ -39,10 +44,11 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public Order createOrder(List<OrderItem> items) {
-
+        logger.info("Attempting create new order");
         Order order = new Order();
         order.setStatus(OrderStatus.CREATED);
         order.setOrderTime(LocalDateTime.now());
+        logger.info("Set items:{}", items);
         order.setItems(new ArrayList<>());
 
         for (OrderItem item : items) {
@@ -53,7 +59,7 @@ public class OrderServiceImpl implements OrderService {
             if (good.getQuantity() < item.getQuantity()) {
                 throw new NotEnoughQuantityOfItemException("Not enough stock for " + good.getName());
             }
-
+            logger.info("Change good quantity in storage");
             good.setQuantity(good.getQuantity() - item.getQuantity());
             goodRepository.save(good);
 
@@ -68,6 +74,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public Order updateOrder(Long orderId, List<OrderItem> updatedItems) {
+        logger.info("Attempting update order");
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException("Order not found"));
 
@@ -114,6 +121,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public Order payForOrder(Long orderId) {
+        logger.info("Attempting pay for order");
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException("Order not found"));
 
@@ -128,6 +136,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public Order deleteOrderItem(Long orderId, Long itemId) {
+        logger.info("Attempting delete item in order");
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException("Order not found"));
 
@@ -147,6 +156,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public void deleteOrderById(Long id) {
+        logger.info("Attempting delete order with id:{}", id);
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new OrderNotFoundException("Order not found"));
 
@@ -162,7 +172,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public void deleteUnpaidOrders() {
-
+        logger.info("Attempting delete unpaid orders");
         LocalDateTime cutoffTime = LocalDateTime.now().minusMinutes(10);
         List<Order> unpaidOrders = orderRepository.findByStatusAndOrderTimeBefore(OrderStatus.CREATED, cutoffTime);
 
