@@ -28,14 +28,16 @@ CREATE TABLE database.order_items (
 
 --changeset yevheniy:4
 INSERT INTO database.goods (name, price, quantity) VALUES
-('iPhone 13', 999.99, 10),
-('Samsung Galaxy S22', 799.99, 15),
-('Google Pixel 7', 599.99, 20),
-('OnePlus 10 Pro', 699.99, 8),
-('Sony Xperia 5 IV', 899.99, 5);
+('iPhone 16', 999.99, 100),
+('Samsung Galaxy S24', 799.99, 100),
+('Google Pixel', 599.99, 100),
+('OnePlus 10 Pro', 699.99, 100),
+('Sony Xperia', 899.99, 100);
 
 --changeset yevheniy:5
 INSERT INTO database.orders (status, order_time) VALUES
+('CREATED', CURRENT_TIMESTAMP),
+('CREATED', CURRENT_TIMESTAMP),
 ('CREATED', CURRENT_TIMESTAMP),
 ('CREATED', CURRENT_TIMESTAMP),
 ('PAID', CURRENT_TIMESTAMP);
@@ -45,6 +47,10 @@ INSERT INTO database.order_items (order_id, goods_id, quantity) VALUES
 (1, 1, 2),
 (1, 2, 3),
 (2, 3, 1),
-(3, 4, 5);
+(2, 4, 1),
+(3, 4, 5),
+(4, 5, 5),
+(5, 5, 10);
+
 
 
