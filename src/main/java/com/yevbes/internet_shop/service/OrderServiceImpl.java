@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -153,11 +154,7 @@ public class OrderServiceImpl implements OrderService {
             throw new PaidOrderCannotBeDeletedException("Cannot delete a paid order");
         }
 
-        for (OrderItem item : order.getItems()) {
-            Good goods = item.getGood();
-            goods.setQuantity(goods.getQuantity() + item.getQuantity());
-            goodRepository.save(goods);
-        }
+        updateGoodsQuantities(order);
 
         orderRepository.delete(order);
     }
@@ -169,8 +166,19 @@ public class OrderServiceImpl implements OrderService {
         LocalDateTime cutoffTime = LocalDateTime.now().minusMinutes(10);
         List<Order> unpaidOrders = orderRepository.findByStatusAndOrderTimeBefore(OrderStatus.CREATED, cutoffTime);
 
-        for (Order order : unpaidOrders) {
-            deleteOrderById(order.getId());
+        if (!unpaidOrders.isEmpty()) {
+            unpaidOrders.forEach(this::updateGoodsQuantities);
+            orderRepository.deleteAll(unpaidOrders);
+        }
+    }
+
+    @Transactional
+    private void updateGoodsQuantities(Order order) {
+
+        for (OrderItem itemOrdered : order.getItems()) {
+            Good goods = itemOrdered.getGood();
+            goods.setQuantity(goods.getQuantity() + itemOrdered.getQuantity());
+            goodRepository.save(goods);
         }
     }
 }
