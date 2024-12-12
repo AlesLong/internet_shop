@@ -1,4 +1,4 @@
-Project Overview
+Project Overview.  
 This project is an online shop application developed using Spring Boot, JPA, MySQL, and Liquibase for managing e-commerce functionalities.
 It supports CRUD operations for goods and orders, with clear separation of services and controllers for scalability and maintenance.
 
