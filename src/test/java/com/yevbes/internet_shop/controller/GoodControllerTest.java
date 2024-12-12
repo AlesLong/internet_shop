@@ -31,9 +31,9 @@ class GoodControllerTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this); // Initialize mocks
+        MockitoAnnotations.openMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(goodController).build();
-        good = new Good("Sample Good", 100.0, 10); // Initialize a sample Good object
+        good = new Good("Sample Good", 100.0, 10);
     }
 
     @Test
