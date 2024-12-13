@@ -25,7 +25,6 @@ DELETE /api/orders/{orderId}/items/{itemId}: Remove an item from an order.
 DELETE /api/orders/{id}: Delete an order.
 GET /api/orders: List all orders.
 GET /api/orders/{orderId}: Retrieve an order by ID.
-JSON Example for Creating or Updating an Order
 
 Development Details:
 
