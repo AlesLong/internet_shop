@@ -9,14 +9,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class GoodServiceImpl implements GoodService {
 
     private static final Logger logger = LoggerFactory.getLogger(GoodServiceImpl.class);
 
+    private final GoodRepository goodRepository;
+
     @Autowired
-    private GoodRepository goodRepository;
+    public GoodServiceImpl(GoodRepository goodRepository) {
+        this.goodRepository = goodRepository;
+    }
 
     @Override
     public List<Good> showAllGoods() {
@@ -28,7 +33,7 @@ public class GoodServiceImpl implements GoodService {
     public Good getGoodById(Long id) {
         logger.info("Fetching good with id: {}", id);
         return goodRepository.findById(id)
-                .orElseThrow(() -> new GoodNotFoundException("Good not found with id: " + id));
+                .orElseThrow(() -> new GoodNotFoundException(String.format("Good not found with id: %d", id)));
     }
 
     @Override
@@ -41,13 +46,23 @@ public class GoodServiceImpl implements GoodService {
     public Good updateGood(Long id, Good updatedGood) {
         logger.info("Updating good with id: {}", id);
         Good existingGood = goodRepository.findById(id)
-                .orElseThrow(() -> new GoodNotFoundException("Good not found"));
+                .orElseThrow(() -> new GoodNotFoundException(String.format("Good not found with id: %d", id)));
 
-        existingGood.setName(updatedGood.getName() != null ? updatedGood.getName() : existingGood.getName());
-        existingGood.setPrice(updatedGood.getPrice() > 0 ? updatedGood.getPrice() : existingGood.getPrice());
-        existingGood.setQuantity(updatedGood.getQuantity() >= 0 ? updatedGood.getQuantity() : existingGood.getQuantity());
+        updateGoodFields(existingGood, updatedGood);
 
         return goodRepository.save(existingGood);
     }
 
+    private void updateGoodFields(Good existingGood, Good updatedGood) {
+        Optional.ofNullable(updatedGood.getName())
+                .ifPresent(existingGood::setName);
+
+        if (updatedGood.getPrice() > 0) {
+            existingGood.setPrice(updatedGood.getPrice());
+        }
+
+        if (updatedGood.getQuantity() >= 0) {
+            existingGood.setQuantity(updatedGood.getQuantity());
+        }
+    }
 }
